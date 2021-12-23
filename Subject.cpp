@@ -16,17 +16,6 @@ struct _GP {
 	{"F", 0.0}
 };
 
-void Subject::Initialize() {
-	m_name = " ";
-	m_hakjum = 0;
-	m_grade = " ";
-}
-void Subject::Initialize(string name, int hakjum, string grade) {
-	m_name = name;
-	m_hakjum = hakjum;
-	m_grade = grade;
-	CalcGPA();
-}
 inline void Subject::InputValue(int& i) {
 	cin >> i; // 정수를 입력받기
 	cin.ignore();
@@ -72,6 +61,23 @@ void Subject::CalcGPA() {
 		}
 	}
 }
+void Subject::Modify() {
+	if (this != NULL) {
+		cout << "*(" << m_name << ", 학점: " << m_hakjum << ", 등급: " << m_grade << ")의 정보를 수정하세요.\n";
+		cout << "교과목명: ";
+		InputValue(this->m_name); //해당 자리의 교과목 이름을 새로 초기화
+		cout << "과목학점: ";
+		InputValue(this->m_hakjum); //해당 자리의 교과목 학점을 새로 초기화
+		cout << "과목등급: ";
+		InputValue(this->m_grade); //해당 자리의 교과목 등급을 새로 초기화
+		cout << "\n";
+
+		this->CalcGPA();	//과목의 등급과 학점수가 바뀌면 평점도 바뀐다
+	}
+	else {
+		cout << "해당 과목의 정보가 없습니다.\n\n";
+	}
+}
 string Subject::GetName() {
 	return m_name;
 }
@@ -83,4 +89,28 @@ string Subject::GetGrade() {
 }
 float Subject::GetGPA() {
 	return m_GPA;
+}
+Subject::Subject() {
+	cout << "Subject 디폴트 생성자 호출!" << endl;
+	m_name = " ";
+	m_hakjum = 0;
+	m_grade = " ";
+	m_GPA = 0.0;
+};
+Subject::Subject(string name, int hakjum, string grade) {
+	cout << "Subject 인자있는 생성자 호출!" << endl;
+	m_name = name;
+	m_hakjum = hakjum;
+	m_grade = grade;
+	CalcGPA();
+}
+Subject::Subject(const Subject& sub) {
+	cout << "Subject 복사생성자 호출!" << endl;
+	m_name = sub.m_name; // m_name 복사
+	m_hakjum = sub.m_hakjum; // m_hakjum 복사
+	m_grade = sub.m_grade; // m_grade 복사
+	m_GPA = sub.m_GPA; // m_GPA 복사
+}
+Subject::~Subject() {
+	cout << "Subject 소멸자 호출!" << endl;
 }

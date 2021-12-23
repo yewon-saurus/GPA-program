@@ -14,14 +14,12 @@ protected:
 	float m_avgGPA;
 
 public:
-	void Initialize(); // 멤버변수 초기화
-	void Initialize(string name, int hakbun, int subnum, Subject* sub);
-	void Remove(); // 동적메모리 해제(m_sub)
 	void InputValue(int& i);
 	void InputValue(string& str);
 	void InputData(); // 멤버변수 값 입력
 	void PrintData(); // 멤버변수 값 출력
 	void CalcAveGPA();
+	void Modify();
 
 	string GetName(); // m_name 리턴
 	int GetHakbun(); // m_hakbun 리턴
@@ -29,5 +27,12 @@ public:
 	float GetAveGPA(); // m_aveGPA 리턴
 
 	friend void ShowData(const Student& s);
+
+	Student(); // NULL 또는 0으로 초기화
+	Student(string name, int hakjum, int subnum, Subject* sub);
+	// 멤버변수의 값을 입력된 인자로 초기화, 이때 깊은 복사를 할 수 있도록 구현
+	// 또한 평균평점은 입력되지 않으므로 평균 평점 계산 함수 호출하여 입력
+	Student(const Student& std); // 다른 Student 클래스의 멤버변수의 값으로 초기화
+	~Student(); // 동적 할당 받은 메모리 정리
 };
 #endif
