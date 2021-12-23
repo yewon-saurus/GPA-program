@@ -1,14 +1,20 @@
 /***********************************************************************/
 /*
-		HW#5: 성적처리프로그램#4
+		HW#6: 성적처리프로그램#5
 
-작성자: 김예원									  날짜: 2021년  4월  12일
+작성자: 김예원									  날짜: 2021년  4월  23일
 
 문제 정의:
 성적처리프로그램#3을 다음 부분만 수정한다.
- - 학생 신상 정보 및 성적 정보 입력 부분 함수로 모듈화
- - 2명의 학생과 3개의 교과목을 일률적으로 입력 받던 프로그램을 동적으로
-   학생 수와 과목 수를 입력받을 수 있도록 수정
+ - 문자 배열로 사용했던 데이터타입(학생 이름, 과목 이름)을 string으로
+   변경한다.
+   -> 앞으로 모든 문자열은 string을 사용
+ - 문자열 입력함수 getline()을 사용하여 문자열 입력하도록 수정
+ - 학생 정보 수정하는 함수 수정
+   -> 기존의 학생의 이름과 학번만을 수정할 수 있었던 ModifyStdInfo() 함수
+      를 수정하여 과목명, 학점 수, 등급도 수정할 수 있도록 확장
+ - 특정 과목을 검색하는 함수 추가
+   -> 과목 명을 입력하여 해당 과목이 있는지 검색
 
 교과목 별 평점 계산
 A+     A0    B+     B0    C+     C0    D+     D0    F
@@ -19,23 +25,24 @@ A+     A0    B+     B0    C+     C0    D+     D0    F
 
 #include <iostream>
 #include <cstring>
+#include <string>
 using namespace std;
 
 struct Subject {
-	char SubName[30];
+	string SubName; //string
 	int Hakjum;
-	char Grade[10];
+	string Grade;
 	float GPA;
 };
 struct Student {
-	char StdName[30];
+	string StdName;
 	int Hakbun;
 	Subject* sub;
 	int SubNum; //과목 수 --> 동적으로 할당하기 위해
 	float AveGPA;
 };
 struct _GP {
-	char grade[3];
+	string grade;
 	float grade_point;
 } GP[9] = {
 	{"A+", 4.5},
@@ -56,7 +63,7 @@ struct Subject* sub = NULL;
 struct Student* stu = NULL;
 
 inline void PrintMenu(); //메뉴 출력
-inline void InputValue(char* str); //문자열 타입 데이터 입력 --> 이름, 과목명, 과목 등급
+inline void InputValue(string& str); //문자열 타입 데이터 입력 --> 이름, 과목명, 과목 등급
 inline void InputValue(int& i); //정수형 데이터 입력 --> 메뉴번호, 전체학생 수, 과목 수, 학번, 학점
 void PrintAllStdList(Student* pSt, int StudentNum); //전체 학생 목록 보기
 void ModifyStdInfo(Student* pSt); //학생 정보 수정
@@ -66,7 +73,9 @@ void CalcGPA(Subject& Sub); //교과목의 평점 계산 함수
 float CalcAveGPA(Subject* Sub, int SubNum); //개인 학생의 평균 평점 계산
 void PrintAllData(const Student* pSt, int StudentNum); //전체 학생 정보 출력 함수
 void PrintOneData(const Student& rSt); //개인 학생 정보 출력 함수
+
 Student* StdSearch(Student* pSt, int StudentNum); //학생 이름 검색 함수
+Subject* SubSearch(const Student* pSt); //과목 이름 검색 함수
 
 int main() {
 	PrintMenu();
@@ -81,13 +90,14 @@ inline void PrintMenu() {
 
 		cout << "원하는 기능을 입력하세요: ";
 		int menu;
-		cin >> menu;
+		InputValue(menu);
 
 		switch (menu) { //swith-case 문을 이용하여 메뉴 구현
 		case 1: //1. 학생 성적 입력
 		{
 			cout << "\n몇 명의 정보를 입력하시겠습니까?: ";
 			InputValue(StdNum);
+			cin.ignore();
 			stu = new Student[StdNum]; //학생 StdNum명 만큼 메모리를 동적 할당
 			InputData(stu, StdNum);
 			break;
@@ -108,7 +118,7 @@ inline void PrintMenu() {
 		case 4: //4. 전체 학생 목록 보기
 			PrintAllStdList(stu, StdNum);
 			break;
-		case 5: //5. 학생 정보 수정
+		case 5: //5. 학생 정보 & 과목 정보 수정
 			ModifyStdInfo(stu);
 			break;
 		case 6: //6. 프로그램 종료
@@ -133,6 +143,7 @@ void InputData(Student* stu, int StudentNum) {
 		cout << "\n수강한 과목 수를 입력: ";
 		InputValue(stu[i].SubNum);
 		stu[i].sub = new Subject[(stu + i)->SubNum]; //i + 1번째 학생의 과목 수를 SubNum개 만큼 동적 할당
+		cin.ignore();
 
 		cout << "\n* 수강한 과목 " << stu[i].SubNum << "개의 각 교과목명, 과목학점, 과목등급을 입력하세요.\n";
 		for (j = 0; j < stu[i].SubNum; j++) { //i번째 학생의 교과목 정보를 SubNum회 입력 받기
@@ -140,6 +151,7 @@ void InputData(Student* stu, int StudentNum) {
 			InputValue(stu[i].sub[j].SubName);
 			cout << "과목학점: ";
 			InputValue(stu[i].sub[j].Hakjum);
+			cin.ignore();
 			cout << "과목등급(A+ ~ F): ";
 			InputValue(stu[i].sub[j].Grade);
 			cout << "\n";
@@ -154,7 +166,7 @@ void CalcGPA(Subject& Sub) {
 	//교과목 평점 계산
 	int i;
 	for (i = 0; i < 9; i++) {
-		if (strcmp(Sub.Grade, GP[i].grade) == 0) {
+		if (Sub.Grade == GP[i].grade) {
 			Sub.GPA = Sub.Hakjum * GP[i].grade_point;
 		}
 	}
@@ -172,9 +184,6 @@ float CalcAveGPA(Subject* Sub, int SubNum) {
 	return AveGPA;
 }
 void PrintAllData(const Student* pSt, int StudentNum) {
-	cout.precision(2); //소수점 이하 2자리 까지만 출력하도록 고정
-	cout << fixed;
-
 	cout << "\n\t\t전체 학생 성적 보기\n";
 	cout << "==================================================\n";
 
@@ -186,6 +195,9 @@ void PrintAllData(const Student* pSt, int StudentNum) {
 	return;
 }
 void PrintOneData(const Student& rSt) {
+	cout.precision(2); //소수점 이하 2자리 까지만 출력하도록 고정
+	cout << fixed;
+
 	cout.width(10);
 	cout << "이름: " << rSt.StdName;
 	cout.width(10);
@@ -214,22 +226,37 @@ void PrintOneData(const Student& rSt) {
 	return;
 }
 Student* StdSearch(Student* pSt, int StudentNum) {
-	char name[30];
+	string name;
 	cout << "\n\n\n";
 	cout << "검색 할 학생의 이름: ";
-	cin >> name;
+	cin.ignore();
+	InputValue(name);
 
 	int i;
 	for (i = 0; i < StudentNum; i++) {
-		if (strcmp(name, pSt[i].StdName) == 0) { //찾는 이름이 학생 목록에 있다면
+		if (name == pSt[i].StdName) { //찾는 이름이 학생 목록에 있다면
 			return &pSt[i]; //해당 학생 정보 return
 		}
 	}
 	return NULL;
 }
+Subject* SubSearch(const Student* pSt) {
+	string subName;
+	cout << "\n\n\n";
+	cout << "검색 할 과목의 이름: ";
+	InputValue(subName);
 
-inline void InputValue(char* str) {
-	cin >> str; //문자열을 입력 받기
+	int i;
+	for (i = 0; i < pSt->SubNum; i++) {
+		if (subName == pSt->sub[i].SubName) { //찾는 이름이 학생 목록에 있다면
+			return &pSt->sub[i]; //해당 학생 정보 return
+		}
+	}
+	return NULL;
+}
+
+inline void InputValue(string& str) {
+	getline(cin, str); //문자열을 입력 받기
 }
 inline void InputValue(int& i) {
 	cin >> i; //정수를 입력 받기
@@ -253,14 +280,41 @@ void PrintAllStdList(Student* pSt, int StudentNum) {
 	cout << "\n==================================================";
 }
 void ModifyStdInfo(Student* pSt) {
-	pSt = StdSearch(stu, StdNum);
-	if (pSt != NULL) { //찾는 이름이 학생 목록에 있다면
-		cout << "*(" << pSt->StdName << ", " << pSt->Hakbun << "의 정보를 수정하세요.\n";
-		cout << "이름: ";
-		InputValue(pSt->StdName); //해당 자리의 이름을 새로 초기화
-		cout << "학번: ";
-		InputValue(pSt->Hakbun); //해당 자리의 학번을 새로 초기화
-		cout << "\n";
+	Student* St = StdSearch(pSt, StdNum);
+	if (St != NULL) { //찾는 이름이 학생 목록에 있다면
+		string Type; //학생정보와 과목정보 중 어느것을 수정 할 것인지?
+
+		cout << "수정(학생정보 / 과목정보): ";
+		InputValue(Type);
+
+		if (Type == "학생정보") {
+			cout << "*(" << pSt->StdName << ", " << pSt->Hakbun << ")의 정보를 수정하세요.\n";
+			cout << "이름: ";
+			InputValue(pSt->StdName); //해당 자리의 이름을 새로 초기화
+			cout << "학번: ";
+			InputValue(pSt->Hakbun); //해당 자리의 학번을 새로 초기화
+			cout << "\n";
+		}
+		else if (Type == "과목정보") {
+			Subject* Sub = SubSearch(pSt); //찾는 과목이 과목 목록에 있다면
+			if (Sub != NULL) {
+				cout << "*(" << pSt->sub->SubName << ", 학점: " << pSt->sub->Hakjum << ", 등급: " << pSt->sub->Grade << ")의 정보를 수정하세요.\n";
+				cout << "교과목명: ";
+				InputValue(pSt->sub->SubName); //해당 자리의 교과목 이름을 새로 초기화
+				cout << "과목학점: ";
+				InputValue(pSt->sub->Hakjum); //해당 자리의 교과목 학점을 새로 초기화
+				cin.ignore();
+				cout << "과목등급: ";
+				InputValue(pSt->sub->Grade); //해당 자리의 교과목 등급을 새로 초기화
+				cout << "\n";
+
+				CalcGPA(*pSt->sub); //과목의 등급과 학점수가 바뀌면 평점도 바뀐다
+				pSt->AveGPA = CalcAveGPA(pSt->sub, pSt->SubNum); //해당 학생의 평균 평점 계산
+			}
+			else {
+				cout << "해당 과목의 정보가 없습니다.\n\n";
+			}
+		}
 	}
 	else {
 		cout << "해당 학생의 정보가 없습니다.\n\n";
