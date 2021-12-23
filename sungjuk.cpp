@@ -1,16 +1,14 @@
-/***********************************************************************
+/***********************************************************************/
 /*
-		HW#4-3: 성적처리프로그램#3
+		HW#5: 성적처리프로그램#4
 
-작성자: 김예원									  날짜: 2021년  4월  7일
+작성자: 김예원									  날짜: 2021년  4월  12일
 
 문제 정의:
-성적처리프로그램#2를 다음 부분만 수정한다.
- - 메뉴 출력 함수를 인라인 함수로 변경
- - 추가 구현 함수
-	- 개별 데이터 입력 함수(오버로드된 인라인 함수로 구현)
-	- 전체 학생 목록 보기 함수(학번, 이름 출력)
-	- 학생 정보 수정 함수
+성적처리프로그램#3을 다음 부분만 수정한다.
+ - 학생 신상 정보 및 성적 정보 입력 부분 함수로 모듈화
+ - 2명의 학생과 3개의 교과목을 일률적으로 입력 받던 프로그램을 동적으로
+   학생 수와 과목 수를 입력받을 수 있도록 수정
 
 교과목 별 평점 계산
 A+     A0    B+     B0    C+     C0    D+     D0    F
@@ -23,9 +21,6 @@ A+     A0    B+     B0    C+     C0    D+     D0    F
 #include <cstring>
 using namespace std;
 
-#define HOWMANYSTD 2 //입력받을 학생 수
-#define HOWMANYSUB 3 //입력받을 과목 수
-
 struct Subject {
 	char SubName[30];
 	int Hakjum;
@@ -35,7 +30,8 @@ struct Subject {
 struct Student {
 	char StdName[30];
 	int Hakbun;
-	Subject sub[HOWMANYSUB];
+	Subject* sub;
+	int SubNum; //과목 수 --> 동적으로 할당하기 위해
 	float AveGPA;
 };
 struct _GP {
@@ -53,24 +49,29 @@ struct _GP {
 	{"F", 0.0}
 };
 
-struct Subject sub[HOWMANYSUB];
-struct Student stu[HOWMANYSTD];
+int StdNum;
+int SubNum;
+
+struct Subject* sub = NULL;
+struct Student* stu = NULL;
 
 inline void PrintMenu(); //메뉴 출력
-inline void InputValue(char* str); //이름, 과목명, 과목 등급
-inline void InputValue(int& i); //메뉴번호, 전체학생 수, 과목 수, 학번, 학점
+inline void InputValue(char* str); //문자열 타입 데이터 입력 --> 이름, 과목명, 과목 등급
+inline void InputValue(int& i); //정수형 데이터 입력 --> 메뉴번호, 전체학생 수, 과목 수, 학번, 학점
 void PrintAllStdList(Student* pSt, int StudentNum); //전체 학생 목록 보기
 void ModifyStdInfo(Student* pSt); //학생 정보 수정
 
-int get_input(struct Student* stu, struct Subject* sub); //학생 정보, 과목 정보 입력받기
+void InputData(Student* stu, int StudentNum); //학생 정보, 과목 정보 입력받기 --> (추가)몇 명, 몇 개 입력받을지 동적으로 할당하기
 void CalcGPA(Subject& Sub); //교과목의 평점 계산 함수
-float CalcAveGPA(Subject* Sub); //개인 학생의 평균 평점 계산
+float CalcAveGPA(Subject* Sub, int SubNum); //개인 학생의 평균 평점 계산
 void PrintAllData(const Student* pSt, int StudentNum); //전체 학생 정보 출력 함수
 void PrintOneData(const Student& rSt); //개인 학생 정보 출력 함수
 Student* StdSearch(Student* pSt, int StudentNum); //학생 이름 검색 함수
 
 int main() {
 	PrintMenu();
+	delete[] stu->sub;
+	delete[] stu;
 }
 
 inline void PrintMenu() {
@@ -84,21 +85,19 @@ inline void PrintMenu() {
 
 		switch (menu) { //swith-case 문을 이용하여 메뉴 구현
 		case 1: //1. 학생 성적 입력
-			get_input(stu, sub);
+		{
+			cout << "\n몇 명의 정보를 입력하시겠습니까?: ";
+			InputValue(StdNum);
+			stu = new Student[StdNum]; //학생 StdNum명 만큼 메모리를 동적 할당
+			InputData(stu, StdNum);
 			break;
+		}
 		case 2: //2. 전체 학생 성적 보기
-			int i, j;
-			for (i = 0; i < HOWMANYSTD; i++) {
-				for (j = 0; j < HOWMANYSUB; j++) {
-					CalcGPA(stu[i].sub[j]); //i+1번째 학생의 j+1번째 교과목 평점 구하기
-				}
-				stu[i].AveGPA = CalcAveGPA(stu[i].sub); //교과목 평균 평점 구하기
-			}
-			PrintAllData(stu, HOWMANYSTD); //출력 함수 호출
+			PrintAllData(stu, StdNum); //출력 함수 호출
 			break;
 		case 3: //3. 학생 이름 검색
 			Student * SearchStd;
-			SearchStd = StdSearch(stu, HOWMANYSTD);
+			SearchStd = StdSearch(stu, StdNum);
 			if (SearchStd != NULL) {
 				PrintOneData(*SearchStd);
 			}
@@ -107,10 +106,9 @@ inline void PrintMenu() {
 			}
 			break;
 		case 4: //4. 전체 학생 목록 보기
-			PrintAllStdList(stu, HOWMANYSTD);
+			PrintAllStdList(stu, StdNum);
 			break;
 		case 5: //5. 학생 정보 수정
-			Student stu[HOWMANYSTD];
 			ModifyStdInfo(stu);
 			break;
 		case 6: //6. 프로그램 종료
@@ -121,17 +119,23 @@ inline void PrintMenu() {
 		}
 	}
 }
-int get_input(struct Student* stu, struct Subject* sub) {
-	for (int i = 0; i < HOWMANYSTD; i++) { //학생의 이름을 HOWMANYSTD(2)회 입력 받기
-		cout << "\n\n\n* " << i + 1 << "번째 학생 이름과 학번을 입력하세요\n";
+void InputData(Student* stu, int StudentNum) {
+	int i, j;
+	for (i = 0; i < StudentNum; i++) {
+		cout << "\n* " << i + 1 << "번째 학생 이름과 학번을 입력하세요.\n";
+		// 이름 입력
 		cout << "이름: ";
-		InputValue(stu[i].StdName);
+		InputValue((stu[i]).StdName);
+		// 학번 입력
 		cout << "학번: ";
 		InputValue(stu[i].Hakbun);
-		cout << "\n";
 
-		cout << "* 수강한 과목 " << HOWMANYSUB << "개와 각 교과목명, 과목학점, 과목등급을 입력하세요.\n";
-		for (int j = 0; j < HOWMANYSUB; j++) { //i번째 학생의 교과목 정보를 HOWMANYSUB(3)회 입력 받기
+		cout << "\n수강한 과목 수를 입력: ";
+		InputValue(stu[i].SubNum);
+		stu[i].sub = new Subject[(stu + i)->SubNum]; //i + 1번째 학생의 과목 수를 SubNum개 만큼 동적 할당
+
+		cout << "\n* 수강한 과목 " << stu[i].SubNum << "개의 각 교과목명, 과목학점, 과목등급을 입력하세요.\n";
+		for (j = 0; j < stu[i].SubNum; j++) { //i번째 학생의 교과목 정보를 SubNum회 입력 받기
 			cout << "교과목명: ";
 			InputValue(stu[i].sub[j].SubName);
 			cout << "과목학점: ";
@@ -139,9 +143,12 @@ int get_input(struct Student* stu, struct Subject* sub) {
 			cout << "과목등급(A+ ~ F): ";
 			InputValue(stu[i].sub[j].Grade);
 			cout << "\n";
+
+			CalcGPA(stu[i].sub[j]); //i+1번째 학생의 j+1번째 교과목 평점 구하기
 		}
+		stu[i].AveGPA = CalcAveGPA(stu[i].sub, stu[i].SubNum); //교과목 평균 평점 구하기
 	}
-	return 0;
+	return;
 }
 void CalcGPA(Subject& Sub) {
 	//교과목 평점 계산
@@ -153,15 +160,15 @@ void CalcGPA(Subject& Sub) {
 	}
 	return;
 }
-float CalcAveGPA(Subject* Sub) {
+float CalcAveGPA(Subject* Sub, int SubNum) {
 	//개인 학생의 평균 평점 계산
 	float GPAsum, AveGPA;
 	GPAsum = 0;
 	int i;
-	for (i = 0; i < HOWMANYSUB; i++) {
+	for (i = 0; i < SubNum; i++) {
 		GPAsum += (Sub + i)->GPA;
 	}
-	AveGPA = GPAsum / HOWMANYSUB;
+	AveGPA = GPAsum / SubNum;
 	return AveGPA;
 }
 void PrintAllData(const Student* pSt, int StudentNum) {
@@ -172,8 +179,8 @@ void PrintAllData(const Student* pSt, int StudentNum) {
 	cout << "==================================================\n";
 
 	int i;
-	for (i = 0; i < HOWMANYSTD; i++) {
-		PrintOneData(pSt[i]); //학생 각각의 데이터를 HOWMANYSTU(2)회 출력
+	for (i = 0; i < StudentNum; i++) {
+		PrintOneData(pSt[i]); //학생 각각의 데이터를 StudentNum회 출력
 	}
 	cout << "\n";
 	return;
@@ -190,7 +197,7 @@ void PrintOneData(const Student& rSt) {
 
 	int i;
 	cout << "==================================================\n";
-	for (i = 0; i < HOWMANYSUB; i++) {
+	for (i = 0; i < rSt.SubNum; i++) {
 		cout.width(20);
 		cout << right << rSt.sub[i].SubName;
 		cout.width(10);
@@ -246,13 +253,13 @@ void PrintAllStdList(Student* pSt, int StudentNum) {
 	cout << "\n==================================================";
 }
 void ModifyStdInfo(Student* pSt) {
-	pSt = StdSearch(stu, HOWMANYSTD);
+	pSt = StdSearch(stu, StdNum);
 	if (pSt != NULL) { //찾는 이름이 학생 목록에 있다면
 		cout << "*(" << pSt->StdName << ", " << pSt->Hakbun << "의 정보를 수정하세요.\n";
 		cout << "이름: ";
-		InputValue(pSt->StdName); //해당 자리에 이름을 새로 초기화
+		InputValue(pSt->StdName); //해당 자리의 이름을 새로 초기화
 		cout << "학번: ";
-		InputValue(pSt->Hakbun); //해당 자리에 학번을 새로 초기화
+		InputValue(pSt->Hakbun); //해당 자리의 학번을 새로 초기화
 		cout << "\n";
 	}
 	else {
