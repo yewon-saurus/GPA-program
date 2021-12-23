@@ -16,20 +16,13 @@ struct _GP {
 	{"F", 0.0}
 };
 
-inline void Subject::InputValue(int& i) {
-	cin >> i; // 정수를 입력받기
-	cin.ignore();
-}
-inline void Subject::InputValue(string& str) {
-	getline(cin, str); // 문자열을 입력 받기 --> 틈새 cin.ignore();
-}
 void Subject::InputData() {
 	cout << "교과목명: ";
-	InputValue(m_name);
+	InputUtil::InputValue(m_name);
 	cout << "과목학점: ";
-	InputValue(m_hakjum);
+	InputUtil::InputValue(m_hakjum);
 	cout << "과목등급(A+ ~ F): ";
-	InputValue(m_grade);
+	InputUtil::InputValue(m_grade);
 	cout << "\n";
 	CalcGPA();
 }
@@ -42,7 +35,7 @@ void Subject::PrintTitle() {
 	cout << right << "과목명   과목학점   과목등급   과목평점" << endl; // 오른쪽 정렬
 	cout << "==================================================" << endl;
 }
-void Subject::PrintData() {
+void Subject::PrintData() const {
 	cout.width(20);
 	cout << right << m_name;
 	cout.width(10);
@@ -65,11 +58,11 @@ void Subject::Modify() {
 	if (this != NULL) {
 		cout << "*(" << m_name << ", 학점: " << m_hakjum << ", 등급: " << m_grade << ")의 정보를 수정하세요.\n";
 		cout << "교과목명: ";
-		InputValue(this->m_name); //해당 자리의 교과목 이름을 새로 초기화
+		InputUtil::InputValue(this->m_name); //해당 자리의 교과목 이름을 새로 초기화
 		cout << "과목학점: ";
-		InputValue(this->m_hakjum); //해당 자리의 교과목 학점을 새로 초기화
+		InputUtil::InputValue(this->m_hakjum); //해당 자리의 교과목 학점을 새로 초기화
 		cout << "과목등급: ";
-		InputValue(this->m_grade); //해당 자리의 교과목 등급을 새로 초기화
+		InputUtil::InputValue(this->m_grade); //해당 자리의 교과목 등급을 새로 초기화
 		cout << "\n";
 
 		this->CalcGPA();	//과목의 등급과 학점수가 바뀌면 평점도 바뀐다
@@ -78,16 +71,16 @@ void Subject::Modify() {
 		cout << "해당 과목의 정보가 없습니다.\n\n";
 	}
 }
-string Subject::GetName() {
+string Subject::GetName() const {
 	return m_name;
 }
-int Subject::GetHakjum() {
+int Subject::GetHakjum() const {
 	return m_hakjum;
 }
-string Subject::GetGrade() {
+string Subject::GetGrade() const {
 	return m_grade;
 }
-float Subject::GetGPA() {
+float Subject::GetGPA() const {
 	return m_GPA;
 }
 Subject::Subject() {

@@ -2,21 +2,14 @@
 
 using namespace std;
 
-inline void Student::InputValue(int& i) {
-	cin >> i; // 정수를 입력받기
-	cin.ignore();
-}
-inline void Student::InputValue(string& str) {
-	getline(cin, str);
-}
 void Student::InputData() {
 	cout << "이름: ";
-	InputValue(m_name);
+	InputUtil::InputValue(m_name);
 	cout << "학번: ";
-	InputValue(m_hakbun);
+	InputUtil::InputValue(m_hakbun);
 
 	cout << "\n수강한 과목 수를 입력: ";
-	InputValue(m_subnum);
+	InputUtil::InputValue(m_subnum);
 	m_sub = new Subject[m_subnum];
 
 	cout << "\n* 수강한 과목 " << m_subnum << "개의 각 교과목명, 과목학점, 과목등급을 입력하세요." << endl;
@@ -25,7 +18,7 @@ void Student::InputData() {
 	}
 	CalcAveGPA();
 }
-void Student::PrintData() {
+void Student::PrintData() const{
 	cout.width(10);
 	cout << "이름: " << m_name;
 	cout.width(10);
@@ -51,14 +44,14 @@ void Student::Modify() {
 		string Type; //학생정보와 과목정보 중 어느것을 수정 할 것인지?
 
 		cout << "수정(학생정보 / 과목정보 / 모두): ";
-		InputValue(Type);
+		InputUtil::InputValue(Type);
 
 		if (Type == "학생정보") {
 			cout << "*(" << m_name << ", " << m_hakbun << ")의 정보를 수정하세요.\n";
 			cout << "이름: ";
-			InputValue(m_name); //해당 자리의 이름을 새로 초기화
+			InputUtil::InputValue(m_name); //해당 자리의 이름을 새로 초기화
 			cout << "학번: ";
-			InputValue(m_hakbun); //해당 자리의 학번을 새로 초기화
+			InputUtil::InputValue(m_hakbun); //해당 자리의 학번을 새로 초기화
 			cout << "\n";
 		}
 		else if (Type == "과목정보") {
@@ -70,9 +63,9 @@ void Student::Modify() {
 		else if (Type == "모두") {
 			cout << "*(" << m_name << ", " << m_hakbun << ")의 정보를 수정하세요.\n";
 			cout << "이름: ";
-			InputValue(m_name); //해당 자리의 이름을 새로 초기화
+			InputUtil::InputValue(m_name); //해당 자리의 이름을 새로 초기화
 			cout << "학번: ";
-			InputValue(m_hakbun); //해당 자리의 학번을 새로 초기화
+			InputUtil::InputValue(m_hakbun); //해당 자리의 학번을 새로 초기화
 			cout << "\n";
 
 			for (int i = 0; i < m_subnum; i++) {
@@ -85,16 +78,30 @@ void Student::Modify() {
 		cout << "해당 학생의 정보가 없습니다.\n\n";
 	}
 }
-string Student::GetName() {
+Subject* Student::SubSearch(string subname) const {
+	//string thisSub;
+	//cout << "\n\n";
+	//cout << "검색 할 과목의 이름: ";
+	//InputValue(thisSub);
+
+	for (int i = 0; i < m_subnum; i++) {
+		if (subname == m_sub[i].GetName()) {
+			return &m_sub[i];
+		}
+	}
+	cout << "찾으시는 교과목이 없습니다.";
+	return NULL;
+}
+string Student::GetName() const {
 	return m_name;
 }
-int Student::GetHakbun() {
+int Student::GetHakbun() const {
 	return m_hakbun;
 }
-int Student::GetSubNum() {
+int Student::GetSubNum() const {
 	return m_subnum;
 }
-float Student::GetAveGPA() {
+float Student::GetAveGPA() const{
 	return m_avgGPA;
 }
 Student::Student() {

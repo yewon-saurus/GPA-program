@@ -2,6 +2,7 @@
 #define SUBJECT_H
 #include <iostream>
 #include <string>
+#include "InputUtil.h"
 
 using namespace std;
 class Subject {
@@ -12,18 +13,16 @@ protected:
 	float m_GPA;
 
 public:
-	void InputValue(int& i);
-	void InputValue(string& str);
 	void InputData();	// 멤버변수 값 입력(with InputValue)
-	void PrintTitle();
-	void PrintData();
+	static void PrintTitle();
+	void PrintData() const;
 	void CalcGPA();
 	void Modify();
 
-	string GetName(); // m_name 리턴
-	int GetHakjum(); // m_hakjum 리턴
-	string GetGrade(); // m_grade 리턴
-	float GetGPA(); // m_GPA 리턴
+	string GetName() const; // m_name 리턴
+	int GetHakjum() const; // m_hakjum 리턴
+	string GetGrade() const; // m_grade 리턴
+	float GetGPA() const; // m_GPA 리턴
 
 	Subject();		// NULL 또는 0으로 초기화
 	Subject(string name, int hakjum, string grade); // 입력된 인자로 초기화

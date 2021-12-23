@@ -14,17 +14,16 @@ protected:
 	float m_avgGPA;
 
 public:
-	void InputValue(int& i);
-	void InputValue(string& str);
 	void InputData(); // 멤버변수 값 입력
-	void PrintData(); // 멤버변수 값 출력
+	void PrintData() const; // 멤버변수 값 출력
 	void CalcAveGPA();
 	void Modify();
 
-	string GetName(); // m_name 리턴
-	int GetHakbun(); // m_hakbun 리턴
-	int GetSubNum(); // m_subnum 리턴
-	float GetAveGPA(); // m_aveGPA 리턴
+	string GetName() const; // m_name 리턴
+	int GetHakbun() const; // m_hakbun 리턴
+	int GetSubNum() const; // m_subnum 리턴
+	float GetAveGPA() const; // m_aveGPA 리턴
+	Subject* SubSearch(string subname) const; // 과목 탐색
 
 	friend void ShowData(const Student& s);
 
