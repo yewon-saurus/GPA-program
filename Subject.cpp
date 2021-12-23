@@ -71,9 +71,6 @@ void Subject::Modify() {
 		cout << "해당 과목의 정보가 없습니다.\n\n";
 	}
 }
-string Subject::GetName() const {
-	return m_name;
-}
 int Subject::GetHakjum() const {
 	return m_hakjum;
 }
@@ -84,25 +81,25 @@ float Subject::GetGPA() const {
 	return m_GPA;
 }
 Subject::Subject() {
-	cout << "Subject 디폴트 생성자 호출!" << endl;
 	m_name = " ";
 	m_hakjum = 0;
 	m_grade = " ";
 	m_GPA = 0.0;
+	cout << "Subject 디폴트 생성자 호출!" << endl;
 };
-Subject::Subject(string name, int hakjum, string grade) {
-	cout << "Subject 인자있는 생성자 호출!" << endl;
-	m_name = name;
+Subject::Subject(string name, int hakjum, string grade) : IOInterface(name) {
 	m_hakjum = hakjum;
 	m_grade = grade;
 	CalcGPA();
+	m_data = 100;
+	cout << "Subject 인자있는 생성자 호출!" << endl;
 }
 Subject::Subject(const Subject& sub) {
-	cout << "Subject 복사생성자 호출!" << endl;
 	m_name = sub.m_name; // m_name 복사
 	m_hakjum = sub.m_hakjum; // m_hakjum 복사
 	m_grade = sub.m_grade; // m_grade 복사
 	m_GPA = sub.m_GPA; // m_GPA 복사
+	cout << "Subject 복사생성자 호출!" << endl;
 }
 Subject::~Subject() {
 	cout << "Subject 소멸자 호출!" << endl;

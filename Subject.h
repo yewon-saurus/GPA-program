@@ -2,12 +2,11 @@
 #define SUBJECT_H
 #include <iostream>
 #include <string>
-#include "InputUtil.h"
+#include "IOInterface.h"
 
 using namespace std;
-class Subject {
+class Subject : public IOInterface {
 protected:
-	string m_name;
 	int m_hakjum;
 	string m_grade;
 	float m_GPA;
@@ -19,7 +18,6 @@ public:
 	void CalcGPA();
 	void Modify();
 
-	string GetName() const; // m_name 리턴
 	int GetHakjum() const; // m_hakjum 리턴
 	string GetGrade() const; // m_grade 리턴
 	float GetGPA() const; // m_GPA 리턴

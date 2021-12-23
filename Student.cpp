@@ -55,10 +55,17 @@ void Student::Modify() {
 			cout << "\n";
 		}
 		else if (Type == "과목정보") {
-			for (int i = 0; i < m_subnum; i++) {
-				m_sub[i].Modify(); // 교과목 정보 수정 함수 호출
+			Subject* Sub = SubSearch(m_sub->GetName());
+			if (Sub != NULL) { // 찾는 과목이 있으면
+				m_sub->Modify(); // 해당 과목 수정
+				cout << "\n";
+
+				m_sub->CalcGPA(); // 평점도 새로 계산
+				CalcAveGPA(); //과목의 등급과 학점수가 바뀌면 평점도 바뀐다
 			}
-			CalcAveGPA(); // 해당 학생의 평균 평점 계산
+			else {
+				cout << "해당 과목의 정보가 없습니다.\n\n";
+			}
 		}
 		else if (Type == "모두") {
 			cout << "*(" << m_name << ", " << m_hakbun << ")의 정보를 수정하세요.\n";
@@ -79,21 +86,18 @@ void Student::Modify() {
 	}
 }
 Subject* Student::SubSearch(string subname) const {
-	//string thisSub;
-	//cout << "\n\n";
-	//cout << "검색 할 과목의 이름: ";
-	//InputValue(thisSub);
+	string thisSub;
+	cout << "\n\n";
+	cout << "검색 할 과목의 이름: ";
+	InputUtil::InputValue(thisSub);
 
 	for (int i = 0; i < m_subnum; i++) {
-		if (subname == m_sub[i].GetName()) {
-			return &m_sub[i];
+		if (subname == m_sub[i].GetName()) { // 찾는 이름이 학생 목록에 있다면
+			return &m_sub[i]; // 해당 과목 정보 return
 		}
 	}
 	cout << "찾으시는 교과목이 없습니다.";
 	return NULL;
-}
-string Student::GetName() const {
-	return m_name;
 }
 int Student::GetHakbun() const {
 	return m_hakbun;
@@ -105,16 +109,14 @@ float Student::GetAveGPA() const{
 	return m_avgGPA;
 }
 Student::Student() {
-	cout << "Student 디폴트 생성자 호출!" << endl;
 	m_name = " ";
 	m_hakbun = 0;
 	m_subnum = 0;
 	m_sub = NULL;
 	m_avgGPA = 0.0;
+	cout << "Student 디폴트 생성자 호출!" << endl;
 }
-Student::Student(string name, int hakbun, int subnum, Subject* sub) {
-	cout << "Student 인자있는 생성자 호출!" << endl;
-	m_name = name;
+Student::Student(string name, int hakbun, int subnum, Subject* sub) : IOInterface(name) {
 	m_hakbun = hakbun;
 	m_subnum = subnum;
 	m_sub = new Subject[m_subnum];
@@ -122,9 +124,10 @@ Student::Student(string name, int hakbun, int subnum, Subject* sub) {
 		m_sub[i] = sub[i];
 	}
 	CalcAveGPA();
+	m_data = 300;
+	cout << "Student 인자있는 생성자 호출!" << endl;
 }
 Student::Student(const Student& std) {
-	cout << "Student 복사생성자 호출!" << endl;
 	m_name = std.m_name;
 	m_hakbun = std.m_hakbun;
 	m_subnum = std.m_subnum;
@@ -133,9 +136,10 @@ Student::Student(const Student& std) {
 		m_sub[i] = std.m_sub[i];
 	}
 	m_avgGPA = std.m_avgGPA;
+	cout << "Student 복사생성자 호출!" << endl;
 }
 Student::~Student() {
-	cout << "Student 소멸자 호출!" << endl;
 	delete[] m_sub;
 	m_sub = NULL;
+	cout << "Student 소멸자 호출!" << endl;
 }
