@@ -7,6 +7,7 @@
 using namespace std;
 class Student : public IOInterface {
 protected:
+	string m_name;
 	int m_hakbun;
 	int m_subnum;
 	Subject* m_sub;
@@ -18,6 +19,7 @@ public:
 	void CalcAveGPA();
 	void Modify();
 
+	string GetName() const; // m_name 리턴
 	int GetHakbun() const; // m_hakbun 리턴
 	int GetSubNum() const; // m_subnum 리턴
 	float GetAveGPA() const; // m_aveGPA 리턴

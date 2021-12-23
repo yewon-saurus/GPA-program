@@ -99,6 +99,9 @@ Subject* Student::SubSearch(string subname) const {
 	cout << "찾으시는 교과목이 없습니다.";
 	return NULL;
 }
+string Student::GetName() const {
+	return m_name;
+}
 int Student::GetHakbun() const {
 	return m_hakbun;
 }
@@ -116,7 +119,7 @@ Student::Student() {
 	m_avgGPA = 0.0;
 	cout << "Student 디폴트 생성자 호출!" << endl;
 }
-Student::Student(string name, int hakbun, int subnum, Subject* sub) : IOInterface(name) {
+Student::Student(string name, int hakbun, int subnum, Subject* sub) {
 	m_hakbun = hakbun;
 	m_subnum = subnum;
 	m_sub = new Subject[m_subnum];
@@ -124,7 +127,6 @@ Student::Student(string name, int hakbun, int subnum, Subject* sub) : IOInterfac
 		m_sub[i] = sub[i];
 	}
 	CalcAveGPA();
-	m_data = 300;
 	cout << "Student 인자있는 생성자 호출!" << endl;
 }
 Student::Student(const Student& std) {
